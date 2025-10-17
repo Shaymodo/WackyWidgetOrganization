@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>51ff84e4-3c0e-45fa-a64b-93d3e49ef33c</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>WackyWidgetOrganization.py</StartupFile>
+    <StartupFile>main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -21,7 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="WackyWidgetOrganization.py" />
+    <Compile Include="employee.py" />
+    <Compile Include="main.py" />
+    <Compile Include="organization_manager.py" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
