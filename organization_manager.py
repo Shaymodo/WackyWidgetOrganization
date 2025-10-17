@@ -1,6 +1,8 @@
 from employee import Employee, Vacancy
 
-# TODO: Ensure Vacancy objects do not prevent hiring in their spots
+# TODO:
+# Ensure Vacancy objects do not prevent hiring in their spots
+# President transfers employee to themselves giving wrong error message
 
 class OrganizationManager:
     def __init__(self):
@@ -16,7 +18,7 @@ class OrganizationManager:
         return self.employee_lookup.get(name)
 
     def _determine_valid_role(self, manager):
-        # Determines the role of a new hire based on the manager's role.
+        # Determines the role of an employee based on the manager's role.
         match manager.role:
             case "President":
                 return "Vice President"
@@ -53,6 +55,15 @@ class OrganizationManager:
         for report in employee.reports:
             report.boss = vacancy
             vacancy.reports.append(report)
+
+    def _move_employee(self, employee, new_boss, replacement_index):
+        employee.boss.reports.remove(employee)
+        if replacement_index == -1:
+            new_boss.reports.append(employee)
+        else:
+            new_boss.reports[replacement_index] = employee
+        employee.boss = new_boss
+           
 
     # ----- Main Methods -----
 
@@ -185,13 +196,20 @@ class OrganizationManager:
             return
         # Checks if a spot is available
         if len(destination_manager.reports) >= destination_manager.max_reports:
-            print(f"Error: Destination manager {destination_manager_name} has no vacancies.")
-            return
+            # If full, check for Vacancy objects
+            if not any(isinstance(report, Vacancy) for report in destination_manager.reports):
+                print(f"Error: Destination manager {destination_manager_name} has no vacancies.")
+                return
+            # If there is a Vacancy, replace it to make space
+            for report in destination_manager.reports:
+                if isinstance(report, Vacancy):
+                    replacement_index = destination_manager.reports.index(report)
+                    break
+        else:
+            replacement_index = -1  # Append to end if reports not full
 
         # If everything is valid, perform the transfer
-        employee.boss.reports.remove(employee)
-        destination_manager.reports.append(employee)
-        employee.boss = destination_manager
+        self._move_employee(employee, destination_manager, replacement_index)
         print(f"Successfully transferred {employee_name} to {destination_manager_name}.")
 
         return
