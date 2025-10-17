@@ -1,10 +1,7 @@
 from organization_manager import OrganizationManager
 
-def display_command_info(command, syntax, methods):
-    print(f"\n--- Command: {command} ---")
-    print(f"Usage Syntax: {syntax}")
-    print(f"Internal Call: {methods}")
-    print("-------------------------")
+def incorrect_argument_count(command):
+    print(f"Incorrect number of arguments for command {command}");
 
 def main():
     org_manager = OrganizationManager()
@@ -32,63 +29,65 @@ def main():
 
             # Displays command info for now
             if command == "HIRE":
-                display_command_info(
-                    command,
-                    "HIRE <HiringManagerName> <NewEmployeeName> <Role>",
-                    "org_manager.hire_employee(manager_name, new_name, role)"
-                )
+                if len(parts) != 4:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: HIRE <HiringManagerName> <NewEmployeeName> <Role>")
+                    continue                
+                # org_manager.hire_employee(parts[1], parts[2], parts[3])
             
             elif command == "FIRE":
-                display_command_info(
-                    command,
-                    "FIRE <FiringManagerName> <TargetEmployeeName>",
-                    "org_manager.fire_employee(manager_name, target_name)"
-                )
+                if len(parts) != 3:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: FIRE <FiringManagerName> <TargetEmployeeName>")
+                    continue
+                # org_manager.fire_employee(parts[1], parts[2])
                 
             elif command == "QUIT":
-                display_command_info(
-                    command,
-                    "QUIT <TargetEmployeeName>",
-                    "org_manager.employee_quits(target_name)"
-                )
+                if len(parts) != 2:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: QUIT <TargetEmployeeName>")
+                    continue
+                # org_manager.employee_quits(parts[1])
 
             elif command == "LAYOFF":
-                display_command_info(
-                    command,
-                    "LAYOFF <ManagerName> <TargetEmployeeName>",
-                    "org_manager.layoff_employee(manager_name, target_name)"
-                )
+                if len(parts) != 3:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: LAYOFF <ManagerName> <TargetEmployeeName>")
+                    continue
+                # org_manager.layoff_employee(parts[1], parts[2])
                 
             elif command == "TRANSFER":
-                display_command_info(
-                    command,
-                    "TRANSFER <InitiatorName> <EmployeeName> <NewManagerName>",
-                    "org_manager.transfer_employee(initiator_name, employee_name, destination_manager_name)"
-                )
+                if len(parts) != 4:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: TRANSFER <InitiatorName> <EmployeeName> <NewManagerName>")
+                    continue
+                # org_manager.transfer_employee(parts[1], parts[2], parts[3])
 
             elif command == "PROMOTE":
-                display_command_info(
-                    command,
-                    "PROMOTE <ReceivingManagerName> <TargetEmployeeName>",
-                    "org_manager.promote_employee(receiving_manager_name, target_name)"
-                )
+                if len(parts) != 3:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: PROMOTE <ReceivingManagerName> <TargetEmployeeName>")
+                    continue
+                # org_manager.promote_employee(parts[1], parts[2])
 
             elif command == "LOAD":
-                display_command_info(
-                    command,
-                    "LOAD <filepath>",
-                    "org_manager.load_organization_from_file(filepath)"
-                )
+                if len(parts) != 2:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: LOAD <filepath>")
+                    continue
+                # org_manager.promote_employee(parts[1])
 
             elif command == "DISPLAY":
-                display_command_info(
-                    command,
-                    "DISPLAY",
-                    "org_manager.display_organization()"
-                )
+                if len(parts) != 1:
+                    incorrect_argument_count(command)
+                    print(f"Syntax should be: DISPLAY")
+                    continue
+                # org_manager.display_organization()
+
 
             else:
                 print(f"Error: Unknown command '{command}'.")
+
 
         except Exception as e:
             print(f"An unexpected error occurred: {e}")
