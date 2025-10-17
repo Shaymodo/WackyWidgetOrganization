@@ -49,7 +49,7 @@ def main():
                     incorrect_argument_count(command)
                     print(f"Syntax should be: QUIT <EmployeeName>")
                     continue
-                # org_manager.employee_quits(parts[1])
+                org_manager.employee_quits(parts[1])
 
             elif command == "LAYOFF":
                 if len(parts) != 3:

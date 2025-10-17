@@ -41,6 +41,14 @@ class OrganizationManager:
                 print(f"{indent}{report.role}: {report.name}")
             self._display_loop(report, depth + 1)
 
+    def _replace_employee_with_vacancy(self, employee):
+        vacancy = Vacancy(role=employee.role, boss=employee.boss)
+        employee_index = employee.boss.reports.index(employee)
+        employee.boss.reports[employee_index] = vacancy
+        # Assign the reports to the vacancy
+        for report in employee.reports:
+            report.boss = vacancy
+            vacancy.reports.append(report)
 
     # ----- Main Methods -----
 
@@ -111,36 +119,40 @@ class OrganizationManager:
 
         # If the target employee has reports, leave a vacancy
         elif len(target_employee.reports) > 0:
-            vacancy = Vacancy(role=target_employee.role, boss=target_employee.boss)
-            employee_index = target_employee.boss.reports.index(target_employee)
-            target_employee.boss.reports[employee_index] = vacancy
-            # Assign the reports to the vacancy
-            for report in target_employee.reports:
-                report.boss = vacancy
-                vacancy.reports.append(report)
+            self._replace_employee_with_vacancy(target_employee)
             print(f"Successfully fired {target_employee_name}. Vacancy remains.")
 
         return
 
     def employee_quits(self, employee_name: str):
-        # An employee quits (Requirement 5). Vacancy remains. President cannot quit.
-        pass
+        # An employee quits. Vacancy remains. President cannot quit. (Requirement 5)
+        if employee_name == self.president.name:
+            print("Error: President cannot quit.")
+            return
+        if employee_name not in self.all_names:
+            print(f"Error: Employee name {employee_name} does not exist.")
+            return
+
+        self._replace_employee_with_vacancy(self._find_employee(employee_name))
+        
+        print(f"{employee_name} has quit. Vacancy remains.")
+        return
 
     def layoff_employee(self, manager_name: str, target_employee_name: str):
         # Lays off an employee. Attempts to transfer them to the closest comparable opening (Requirement 6).
-        pass
+        return
 
     def transfer_employee(self, initiator_name: str, employee_name: str, destination_manager_name: str):
         # Transfers an employee to the same level. Initiator must manage both spots, and destination must be vacant (Requirement 7).
-        pass
+        return
 
     def promote_employee(self, receiving_manager_name: str, target_employee_name: str):
         # Promotes an employee one level to a vacancy under a different organization (Requirement 8).
-        pass
+        return
 
     def load_organization_from_file(self, filepath: str):
         # Reads in the initial organization structure from a file (Requirement 9).
-        pass
+        return
 
     def display_organization(self):
         # Displays the current organization hierarchy (Requirement 11).
