@@ -8,7 +8,7 @@ def main():
     
     print("Welcome to the Wacky Widget Company System.")
     # Need to have checks here to ensure president's name is a valid string without spaces ------------------------
-    starting_name = input("Please enter the President's name to begin")
+    starting_name = input("Please enter the President's name to begin: ")
     org_manager.initialize_president(starting_name)
 
     print("\nWelcome to the Wacky Widget Company System.")
@@ -56,28 +56,28 @@ def main():
                     incorrect_argument_count(command)
                     print(f"Syntax should be: LAYOFF <ManagerName> <TargetEmployeeName>")
                     continue
-                # org_manager.layoff_employee(parts[1], parts[2])
+                org_manager.layoff_employee(parts[1], parts[2])
                 
             elif command == "TRANSFER":
                 if len(parts) != 4:
                     incorrect_argument_count(command)
                     print(f"Syntax should be: TRANSFER <InitiatorName> <EmployeeName> <NewManagerName>")
                     continue
-                # org_manager.transfer_employee(parts[1], parts[2], parts[3])
+                org_manager.transfer_employee(parts[1], parts[2], parts[3])
 
             elif command == "PROMOTE":
                 if len(parts) != 3:
                     incorrect_argument_count(command)
                     print(f"Syntax should be: PROMOTE <ReceivingManagerName> <TargetEmployeeName>")
                     continue
-                # org_manager.promote_employee(parts[1], parts[2])
+                org_manager.promote_employee(parts[1], parts[2])
 
             elif command == "LOAD":
                 if len(parts) != 2:
                     incorrect_argument_count(command)
                     print(f"Syntax should be: LOAD <filepath>")
                     continue
-                # org_manager.promote_employee(parts[1])
+                org_manager.promote_employee(parts[1])
 
             elif command == "DISPLAY":
                 if len(parts) != 1:

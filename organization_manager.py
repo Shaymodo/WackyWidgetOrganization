@@ -1,5 +1,7 @@
 from employee import Employee, Vacancy
 
+# TODO: Ensure Vacancy objects do not prevent hiring in their spots
+
 class OrganizationManager:
     def __init__(self):
         self.president = None
@@ -13,7 +15,7 @@ class OrganizationManager:
         # Utility to quickly find an employee object by name.
         return self.employee_lookup.get(name)
 
-    def _determine_hire_role(self, manager):
+    def _determine_valid_role(self, manager):
         # Determines the role of a new hire based on the manager's role.
         match manager.role:
             case "President":
@@ -33,15 +35,17 @@ class OrganizationManager:
         return False
 
     def _display_loop(self, current_spot, depth):
+        # Recursive function to display the organization structure.
         indent = "\t" * depth
         for report in current_spot.reports:
             if isinstance(report, Vacancy):
-                print(f"{indent}Vacancy: {report.role}")
+                print(f"{indent}VACANCY: {report.role}")
             else:
                 print(f"{indent}{report.role}: {report.name}")
             self._display_loop(report, depth + 1)
 
     def _replace_employee_with_vacancy(self, employee):
+        # Replaces an employee with a vacancy, transferring reports to the vacancy.
         vacancy = Vacancy(role=employee.role, boss=employee.boss)
         employee_index = employee.boss.reports.index(employee)
         employee.boss.reports[employee_index] = vacancy
@@ -65,6 +69,7 @@ class OrganizationManager:
 
     def hire_employee(self, hiring_manager_name: str, new_employee_name: str):
         # Hires a new employee under a specific manager (Requirement 3).
+        # Checks if names exist
         if hiring_manager_name not in self.all_names:
             print(f"Error: Hiring manager {hiring_manager_name} does not exist.")
             return
@@ -73,15 +78,17 @@ class OrganizationManager:
             return
 
         hiring_manager = self._find_employee(hiring_manager_name)
+        # Checks if hiring manager can hire
         if hiring_manager.role == "Worker":
             print(f"Error: A worker cannot hire employees.")
             return
+        # Checks if there is an open spot
         if len(hiring_manager.reports) >= hiring_manager.max_reports:
             print(f"Error: Hiring manager {hiring_manager_name} has reached maximum direct reports.")
             return
 
         # If everything is valid, create and add the new employee
-        new_employee = Employee(name=new_employee_name, role=self._determine_hire_role(hiring_manager), boss=hiring_manager)
+        new_employee = Employee(name=new_employee_name, role=self._determine_valid_role(hiring_manager), boss=hiring_manager)
         hiring_manager.reports.append(new_employee)
         self.all_names.add(new_employee_name)
         self.employee_lookup[new_employee_name] = new_employee
@@ -92,6 +99,7 @@ class OrganizationManager:
 
     def fire_employee(self, firing_manager_name: str, target_employee_name: str):
         # Removes an employee, leaving a vacancy. Firing manager must be in target's hierarchy (Requirement 4).
+        # Checks if names exist
         if target_employee_name == self.president.name:
             print("Error: Cannot fire the President.")
             return
@@ -104,6 +112,7 @@ class OrganizationManager:
 
         firing_manager = self._find_employee(firing_manager_name)
         target_employee = self._find_employee(target_employee_name)
+        # Checks if firing manager is in target employee's hierarchy
         if not self._is_manager_of(firing_manager, target_employee):
             print(f"Error: {firing_manager_name} is not in the hierarchy of {target_employee_name}.")
             return
@@ -126,6 +135,7 @@ class OrganizationManager:
 
     def employee_quits(self, employee_name: str):
         # An employee quits. Vacancy remains. President cannot quit. (Requirement 5)
+        # Checks if names exist
         if employee_name == self.president.name:
             print("Error: President cannot quit.")
             return
@@ -133,8 +143,8 @@ class OrganizationManager:
             print(f"Error: Employee name {employee_name} does not exist.")
             return
 
+        # Remove employee
         self._replace_employee_with_vacancy(self._find_employee(employee_name))
-        
         print(f"{employee_name} has quit. Vacancy remains.")
         return
 
@@ -144,6 +154,46 @@ class OrganizationManager:
 
     def transfer_employee(self, initiator_name: str, employee_name: str, destination_manager_name: str):
         # Transfers an employee to the same level. Initiator must manage both spots, and destination must be vacant (Requirement 7).
+        # Checks if names all exist
+        if initiator_name not in self.all_names:
+            print(f"Error: Initiator {initiator_name} does not exist.")
+            return
+        if employee_name not in self.all_names:
+            print(f"Error: Employee name {employee_name} does not exist.")
+            return
+        if destination_manager_name not in self.all_names:
+            print(f"Error: Destination manager {destination_manager_name} does not exist.")
+            return
+        # Checks if initiator is President or VP
+        initiator = self._find_employee(initiator_name)
+        if initiator.role not in ["President", "Vice President"]:
+            print(f"Error: Initiator {initiator_name} does not have permission to transfer employees.")
+            return
+        # Checks if initiator manages employee getting transferred
+        employee = self._find_employee(employee_name)
+        if not self._is_manager_of(initiator, employee):
+            print(f"Error: {initiator_name} does not manage {employee_name}.")
+            return
+        # Checks if initiator manages destination manager
+        destination_manager = self._find_employee(destination_manager_name)
+        if not self._is_manager_of(initiator, destination_manager):
+            print(f"Error: {initiator_name} does not manage {destination_manager_name}.")
+            return
+        # Checks if roles match
+        if employee.role != self._determine_valid_role(destination_manager):
+            print(f"Error: Employee {employee_name} cannot be transferred to {destination_manager_name} due to role mismatch.")
+            return
+        # Checks if a spot is available
+        if len(destination_manager.reports) >= destination_manager.max_reports:
+            print(f"Error: Destination manager {destination_manager_name} has no vacancies.")
+            return
+
+        # If everything is valid, perform the transfer
+        employee.boss.reports.remove(employee)
+        destination_manager.reports.append(employee)
+        employee.boss = destination_manager
+        print(f"Successfully transferred {employee_name} to {destination_manager_name}.")
+
         return
 
     def promote_employee(self, receiving_manager_name: str, target_employee_name: str):
