@@ -6,20 +6,22 @@ def incorrect_argument_count(command):
 def main():
     org_manager = OrganizationManager()
     
-    # President Placeholder
-    org_manager.initialize_president("Mr. Wacky")
+    print("Welcome to the Wacky Widget Company System.")
+    # Need to have checks here to ensure president's name is a valid string without spaces ------------------------
+    starting_name = input("Please enter the President's name to begin")
+    org_manager.initialize_president(starting_name)
 
     print("\nWelcome to the Wacky Widget Company System.")
     print("Available commands: HIRE, FIRE, QUIT, LAYOFF, TRANSFER, PROMOTE, LOAD, DISPLAY, EXIT.")
 
     while True:
         try:
-            user_input = input("\nEnter command: ").strip().upper()
+            user_input = input("\nEnter command: ").strip()
             if not user_input:
                 continue
 
             parts = user_input.split()
-            command = parts[0]
+            command = parts[0].upper()
 
             # Exit condition
             if command == "EXIT":
@@ -29,23 +31,23 @@ def main():
 
             # Displays command info for now
             if command == "HIRE":
-                if len(parts) != 4:
+                if len(parts) != 3:
                     incorrect_argument_count(command)
-                    print(f"Syntax should be: HIRE <HiringManagerName> <NewEmployeeName> <Role>")
+                    print(f"Syntax should be: HIRE <ManagerName> <NewEmployeeName>")
                     continue                
-                # org_manager.hire_employee(parts[1], parts[2], parts[3])
+                org_manager.hire_employee(parts[1], parts[2])
             
             elif command == "FIRE":
                 if len(parts) != 3:
                     incorrect_argument_count(command)
-                    print(f"Syntax should be: FIRE <FiringManagerName> <TargetEmployeeName>")
+                    print(f"Syntax should be: FIRE <ManagerName> <EmployeeName>")
                     continue
-                # org_manager.fire_employee(parts[1], parts[2])
+                org_manager.fire_employee(parts[1], parts[2])
                 
             elif command == "QUIT":
                 if len(parts) != 2:
                     incorrect_argument_count(command)
-                    print(f"Syntax should be: QUIT <TargetEmployeeName>")
+                    print(f"Syntax should be: QUIT <EmployeeName>")
                     continue
                 # org_manager.employee_quits(parts[1])
 
@@ -82,7 +84,7 @@ def main():
                     incorrect_argument_count(command)
                     print(f"Syntax should be: DISPLAY")
                     continue
-                # org_manager.display_organization()
+                org_manager.display_organization()
 
 
             else:
