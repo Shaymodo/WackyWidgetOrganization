@@ -7,7 +7,6 @@ def main():
     org_manager = OrganizationManager()
     
     print("Welcome to the Wacky Widget Company System.")
-    # Need to have checks here to ensure president's name is a valid string without spaces ------------------------
     starting_name = input("Please enter the President's name to begin: ")
     org_manager.initialize_president(starting_name)
 
@@ -25,11 +24,9 @@ def main():
 
             # Exit condition
             if command == "EXIT":
-                print("Exiting Wacky Widget HR System. Goodbye!")
+                print("Exiting Wacky Widget HR System.")
                 break
 
-
-            # Displays command info for now
             if command == "HIRE":
                 if len(parts) != 3:
                     incorrect_argument_count(command)

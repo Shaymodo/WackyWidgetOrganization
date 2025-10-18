@@ -6,7 +6,8 @@ from employee import Employee, Vacancy
 # Check if a Vacancy object has no reports, delete Vacancy object if so
 # Layoff implementation
 # Read organization from file implementation
-# 
+# Add checks for inputting president name at start of program
+
 
 class OrganizationManager:
     def __init__(self):
