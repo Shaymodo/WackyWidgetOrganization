@@ -9,17 +9,6 @@ ROLE_CAPACITY = {
 }
 
 class OrganizationSpot(ABC):
-    def get_level(self):
-        match self.role:
-            case "President":
-                return 4
-            case "Vice President":
-                return 3
-            case "Supervisor":
-                return 2
-            case "Worker":
-                return 1
-        return 0
     def is_vacant(self):
         return isinstance(self, Vacancy)
 
@@ -30,6 +19,13 @@ class Employee(OrganizationSpot):
         self.boss = boss                # Reference to Employee directly above
         self.reports = []               # List of Employees directly below
         self.max_reports = ROLE_CAPACITY.get(role, 0) # Maximum number of direct reports
+
+    def promote(self):
+        if self.role == "Worker":
+            self.role = "Supervisor"
+        elif self.role == "Supervisor":
+            self.role = "Vice President"
+        self.max_reports = ROLE_CAPACITY.get(self.role, 0)
 
 class Vacancy(OrganizationSpot):
     def __init__(self, role: str, boss=None):
