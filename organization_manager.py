@@ -1,3 +1,4 @@
+from tkinter import N
 from employee import Employee, Vacancy
 
 # TODO:
@@ -14,7 +15,6 @@ class OrganizationManager:
         self.president = None
         self.all_names = set()      # Keeps names unique
         self.employee_lookup = {}   # Dict for name to Employee object
-
 
     # ----- Helper Methods -----
 
@@ -35,7 +35,7 @@ class OrganizationManager:
     def _is_manager_of(self, manager, employee):
         # Checks if the manager is in the employee's hierarchy (up the tree).
         current_boss = employee.boss
-        while current_boss is not None:
+        while current_boss != None:
             if current_boss is manager:
                 return True
             current_boss = current_boss.boss
@@ -61,6 +61,20 @@ class OrganizationManager:
             report.boss = vacancy
             vacancy.reports.append(report)
 
+    def _remove_employee(self, employee):
+        self.all_names.remove(employee)
+        del self.employee_lookup[employee]
+
+        # If the target employee has no reports
+        if len(employee.reports) == 0:
+            employee.boss.reports.remove(employee)
+            print(f"{employee.name} has been removed from the company.")
+
+        # If the target employee has reports, leave a vacancy
+        elif len(employee.reports) > 0:
+            self._replace_employee_with_vacancy(employee)
+            print(f"{employee.name} has been removed from the company. Vacancy remains.")
+
     def _move_employee(self, employee, new_boss, replacement_index):
         employee.boss.reports.remove(employee)
         if replacement_index == -1:
@@ -70,12 +84,13 @@ class OrganizationManager:
         employee.boss = new_boss
 
     def _has_spots(self, manager):
-        # Checks if a manager has availability for new reports.
+        # Checks if a manager has availability for new reports. Returns True if open spot, index of Vacancy if found, False otherwise.
         if len(manager.reports) < manager.max_reports:
             return True
         # Check for Vacancy objects
-        if self._check_vancancy_objects(manager) != -1:
-            return True
+        index = self._check_vancancy_objects(manager)
+        if index != -1:
+            return index
         return False
 
     def _check_vancancy_objects(self, manager):
@@ -84,13 +99,54 @@ class OrganizationManager:
             if isinstance(report, Vacancy):
                 return index
         return -1
-           
+
+    def _search_vice_presidents(self, president, invalid_index):
+        # Searches through VPs under the President for an opening. invalid_index is the index of the VP to skip. invalid_index = -1 means no skip.
+        # Has empty spot
+        if self._has_spots(president):
+            return -1, president
+        # Has Vacancy object
+        elif self._has_spots(president) != False:
+            return self._check_vancancy_objects(president), president
+
+        # No Vice President openings found
+        return None, None
+
+    def _search_supervisors(self, VP, invalid_index):
+        # Searches through Supervisors under a VP for an opening. invalid_index is the index of the Supervisor to skip. invalid_index = -1 means no skip.
+        # Has empty spot
+        if self._has_spots(VP):
+            return -1, VP
+        # Has Vacancy object
+        elif self._has_spots(VP) != False:
+            return self._check_vancancy_objects(VP), VP
+
+        return None, None
+
+    def _search_workers(self, supervisor, invalid_index):
+        # Searches through Workers under a Supervisor for an opening. invalid_index is the index of the Worker to skip. invalid_index = -1 means no skip.
+        pass
+
+    def _find_opening(self, current_manager, role, current_index):
+        # Finds the closest comparable opening, returns report index and new boss object
+        # If there is another VP position available under President, return that index and President object
+        if role == "Vice President":
+            new_index, new_boss = self._search_vice_presidents(current_manager.boss, current_index)
+        elif role == "Supervisor":
+            new_index, new_boss = self._search_supervisors(current_manager.boss, current_index)
+        elif role == "Worker":
+            new_index, new_boss = self._search_workers(current_manager.boss, current_index)
+
+        # If the found opening does not match the role, return None -------- FIX THIS LATER
+        if role != self._determine_valid_role(new_boss):
+            return None, None
+        return new_index, new_boss
 
     # ----- Main Methods -----
 
     def initialize_president(self, name: str):
         # Checks if president already exists, should never happen
-        if self.president is not None: return False
+        if self.president != None: return False
         
         president = Employee(name=name, role="President", boss=None)
         self.president = president
@@ -153,21 +209,9 @@ class OrganizationManager:
         if not self._is_manager_of(firing_manager, target_employee):
             print(f"Error: {firing_manager_name} is not in the hierarchy of {target_employee_name}.")
             return
-
+        
         # If everything is valid, remove the employee
-        self.all_names.remove(target_employee_name)
-        del self.employee_lookup[target_employee_name]
-
-        # If the target employee has no reports
-        if len(target_employee.reports) == 0:
-            target_employee.boss.reports.remove(target_employee)
-            print(f"Successfully fired {target_employee_name}.")
-
-        # If the target employee has reports, leave a vacancy
-        elif len(target_employee.reports) > 0:
-            self._replace_employee_with_vacancy(target_employee)
-            print(f"Successfully fired {target_employee_name}. Vacancy remains.")
-
+        self._remove_employee(target_employee)
         return
 
 
@@ -182,8 +226,7 @@ class OrganizationManager:
             return
 
         # Remove employee
-        self._replace_employee_with_vacancy(self._find_employee(employee_name))
-        print(f"{employee_name} has quit. Vacancy remains.")
+        self._remove_employee(self._find_employee(employee_name))
         return
 
 
@@ -211,7 +254,18 @@ class OrganizationManager:
             print(f"Error: {manager_name} is not in the hierarchy of {target_employee_name}.")
             return
 
-        # If everything is valid, do stuff
+        index, new_boss = self._find_opening(target_employee.boss, target_employee.role, target_employee.boss.reports.index(target_employee))
+
+        # No opening found, remove employee
+        if index == None:
+            self._remove_employee(target_employee)
+            return
+
+        # Empty spot or Vacancy found, move employee to new location
+        else:
+            self._move_employee(target_employee, new_boss, index)
+
+
         return
 
 
