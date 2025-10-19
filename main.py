@@ -8,6 +8,7 @@ def main():
     
     print("Welcome to the Wacky Widget Company System.")
     starting_name = input("Please enter the President's name to begin: ")
+    # All names should not contain spaces for simplicity
     org_manager.initialize_president(starting_name)
 
     print("\nWelcome to the Wacky Widget Company System.")

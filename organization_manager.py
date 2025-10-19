@@ -1,12 +1,11 @@
 from employee import Employee, Vacancy
 
 # TODO:
-# Ensure Vacancy objects do not prevent hiring in their spots
-# President transfers employee to themselves giving wrong error message
-# Check if a Vacancy object has no reports, delete Vacancy object if so
-# Layoff not creating vacancy and leaving reports behind
-# Read organization from file implementation
+# Implement file reading method
+# Check if a Vacancy object has no reports, delete Vacancy object if so. Should be done after every operation that moves or removes employees
+# Layoff not properly creating Vacancy and leaving reports behind? Unsure if they should leave their reports behind or not
 # Add checks for inputting president name at start of program
+# Should we allow transferring an employee to a Vacancy?
 
 
 class OrganizationManager:
@@ -31,6 +30,23 @@ class OrganizationManager:
             case "Supervisor":
                 return "Worker"
         
+    def _add_employee(self, manager, new_employee_name):
+        new_employee = Employee(name=new_employee_name, role=self._determine_valid_role(manager), boss=manager)
+        manager.reports.append(new_employee)
+        self.all_names.add(new_employee_name)
+        self.employee_lookup[new_employee_name] = new_employee
+        print(f"Successfully hired {new_employee_name} under {manager.name}.")
+        
+    def _replace_vacancy_with_new_employee(self, manager, vacancy_index, new_employee_name):
+        vacancy = manager.reports[vacancy_index]
+        vacancy_reports = vacancy.reports
+        new_employee = Employee(name=new_employee_name, role=vacancy.role, boss=manager)
+        manager.reports[vacancy_index] = new_employee
+        new_employee.reports = vacancy_reports
+        self.all_names.add(new_employee_name)
+        self.employee_lookup[new_employee_name] = new_employee
+        print(f"Successfully placed {new_employee_name} under {manager.name}.")
+
     def _is_superior_to(self, manager, employee):
         # Checks if the manager is in the employee's hierarchy (up the tree).
         current_boss = employee.boss
@@ -82,7 +98,7 @@ class OrganizationManager:
         else:
             new_boss.reports[replacement_index] = employee
         employee.boss = new_boss
-        print(f"Successfully moved {employee.name} under {new_boss.name}.")
+        print(f"Successfully placed {employee.name} under {new_boss.name}.")
 
     def _has_spots(self, manager):
         # Checks if a manager has availability for new reports. Returns True if open spot, index of Vacancy if found, False otherwise.
@@ -205,18 +221,20 @@ class OrganizationManager:
             print(f"Error: A worker cannot hire employees.")
             return
 
+        result = self._has_spots(hiring_manager)
         # Checks if there is an open spot
-        if not self._has_spots(hiring_manager):
+        if result is False:
             print(f"Error: Hiring manager {hiring_manager_name} has reached maximum direct reports.")
             return
 
-        # If everything is valid, create and add the new employee
-        new_employee = Employee(name=new_employee_name, role=self._determine_valid_role(hiring_manager), boss=hiring_manager)
-        hiring_manager.reports.append(new_employee)
-        self.all_names.add(new_employee_name)
-        self.employee_lookup[new_employee_name] = new_employee
+        # Replace empty spot with new employee
+        elif result is True:
+            self._add_employee(hiring_manager, new_employee_name)
 
-        print(f"Successfully hired {new_employee_name} under {hiring_manager_name}.")
+        # Replace Vacancy object with new employee
+        else:
+            self._replace_vacancy_with_new_employee(hiring_manager, result, new_employee_name)
+       
 
         return
 
@@ -326,9 +344,9 @@ class OrganizationManager:
             print(f"Error: {initiator_name} does not manage {employee_name}.")
             return
 
-        # Checks if initiator manages destination manager
+        # Checks if initiator manages destination manager, or if initiator is destination manager
         destination_manager = self._find_employee(destination_manager_name)
-        if not self._is_superior_to(initiator, destination_manager):
+        if not self._is_superior_to(initiator, destination_manager) and initiator != destination_manager:
             print(f"Error: {initiator_name} does not manage {destination_manager_name}.")
             return
 
@@ -419,8 +437,10 @@ class OrganizationManager:
             return
         # Process each line
         for line in lines:
-            # Need to decide on file format first
+            # Need to decide on file structure first
             pass
+
+        print(f"Successfully loaded organization from {filepath}.")
         return
 
 
