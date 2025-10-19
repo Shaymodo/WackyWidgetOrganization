@@ -4,7 +4,7 @@ from employee import Employee, Vacancy
 # Ensure Vacancy objects do not prevent hiring in their spots
 # President transfers employee to themselves giving wrong error message
 # Check if a Vacancy object has no reports, delete Vacancy object if so
-# Layoff implementation
+# Layoff not creating vacancy and leaving reports behind
 # Read organization from file implementation
 # Add checks for inputting president name at start of program
 
@@ -61,8 +61,9 @@ class OrganizationManager:
             vacancy.reports.append(report)
 
     def _remove_employee(self, employee):
-        self.all_names.remove(employee)
-        del self.employee_lookup[employee]
+        # Removes an employee from the organization.
+        self.all_names.remove(employee.name)
+        del self.employee_lookup[employee.name]
 
         # If the target employee has no reports
         if len(employee.reports) == 0:
@@ -81,6 +82,7 @@ class OrganizationManager:
         else:
             new_boss.reports[replacement_index] = employee
         employee.boss = new_boss
+        print(f"Successfully moved {employee.name} under {new_boss.name}.")
 
     def _has_spots(self, manager):
         # Checks if a manager has availability for new reports. Returns True if open spot, index of Vacancy if found, False otherwise.
@@ -289,6 +291,7 @@ class OrganizationManager:
         if index is None:
             print(f"No comparable openings found")
             self._remove_employee(target_employee)
+            print("Done")
             return
 
         # If opening found, transfer employee
@@ -343,7 +346,6 @@ class OrganizationManager:
 
         # If everything is valid, perform the transfer
         self._move_employee(employee, destination_manager, replacement_index)
-        print(f"Successfully transferred {employee_name} to {destination_manager_name}.")
 
         return
 
