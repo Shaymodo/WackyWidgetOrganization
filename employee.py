@@ -1,5 +1,4 @@
 from abc import ABC
-from re import S
 
 ROLE_CAPACITY = {
     "President": 2,

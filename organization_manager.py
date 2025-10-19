@@ -1,4 +1,3 @@
-from tkinter import N
 from employee import Employee, Vacancy
 
 # TODO:
@@ -99,6 +98,9 @@ class OrganizationManager:
             if isinstance(report, Vacancy):
                 return index
         return -1
+    
+
+    # Layoff helper methods ------ Feel free to delete or modify these -----
 
     def _search_vice_presidents(self, president, invalid_index):
         # Searches through VPs under the President for an opening. invalid_index is the index of the VP to skip. invalid_index = -1 means no skip.
@@ -230,7 +232,7 @@ class OrganizationManager:
         return
 
 
-    # FINISH THIS ----------------------------------------------------------------------
+    # Temporary layoff implementation ----- Feel free to restart or modify this
     def layoff_employee(self, manager_name: str, target_employee_name: str):
         # Lays off an employee. Attempts to transfer them to the closest comparable opening (Requirement 6).
         # Cannot lay off President
