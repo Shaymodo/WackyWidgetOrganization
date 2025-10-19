@@ -31,7 +31,7 @@ class OrganizationManager:
             case "Supervisor":
                 return "Worker"
         
-    def _is_manager_of(self, manager, employee):
+    def _is_superior_to(self, manager, employee):
         # Checks if the manager is in the employee's hierarchy (up the tree).
         current_boss = employee.boss
         while current_boss != None:
@@ -98,51 +98,79 @@ class OrganizationManager:
             if isinstance(report, Vacancy):
                 return index
         return -1
-    
 
-    # Layoff helper methods ------ Feel free to delete or modify these -----
+    def _find_opening(self, manager, role):
+        # Determines which helper method to call based on role.
+        match role:
+            case "Worker":
+                return self._find_worker_opening(manager)
+            case "Supervisor":
+                return self._find_super_opening(manager)
+            case "Vice President":
+                return self._find_vp_opening(manager)
+        return None, None
 
-    def _search_vice_presidents(self, president, invalid_index):
-        # Searches through VPs under the President for an opening. invalid_index is the index of the VP to skip. invalid_index = -1 means no skip.
-        # Has empty spot
-        if self._has_spots(president):
+    def _find_worker_opening(self, supervisor):
+        # Checks for worker openings in the company
+        # Checks for empty spots under current Supervisor
+        result = self._has_spots(supervisor)
+        if result is True:
+            return -1, supervisor
+        # Checks for Vacancy objects under current Supervisor
+        elif result != False:
+            return result, supervisor
+        # Otherwise, move to other Supervisors if they exist
+        for report in supervisor.boss.reports:
+            if report is not supervisor:
+                result = self._has_spots(report)
+                if result is True:
+                    return -1, report
+                elif result != False:
+                    return result, report
+        # No Worker openings found under current VP branch, move to other VP branch if it exists
+        for vp in supervisor.boss.boss.reports:
+            if vp is not supervisor.boss:
+                for report in vp.reports:
+                    result = self._has_spots(report)
+                    if result is True:
+                        return -1, report
+                    elif result != False:
+                        return result, report
+        # No Worker openings found
+        return None, None
+
+    def _find_super_opening(self, vp):
+        # Checks for supervisor openings in the company
+        # Checks for empty spots under current VP
+        result = self._has_spots(vp)
+        if result is True:
+            return -1, vp
+        # Checks for Vacancy objects under current VP
+        elif result != False:
+            return result, vp
+        # Otherwise, move to other VP if it exists
+        for report in vp.boss.reports:
+            if report is not vp:
+                result = self._has_spots(report)
+                if result is True:
+                    return -1, report
+                elif result != False:
+                    return result, report
+
+        # No Supervisor openings found
+        return None, None
+
+    def _find_vp_opening(self, president):
+        # Checks if other VP spot is available
+        result = self._has_spots(president)
+        if result is True:
             return -1, president
         # Has Vacancy object
-        elif self._has_spots(president) != False:
-            return self._check_vancancy_objects(president), president
-
+        elif result != False:
+            return result, president
         # No Vice President openings found
         return None, None
 
-    def _search_supervisors(self, VP, invalid_index):
-        # Searches through Supervisors under a VP for an opening. invalid_index is the index of the Supervisor to skip. invalid_index = -1 means no skip.
-        # Has empty spot
-        if self._has_spots(VP):
-            return -1, VP
-        # Has Vacancy object
-        elif self._has_spots(VP) != False:
-            return self._check_vancancy_objects(VP), VP
-
-        return None, None
-
-    def _search_workers(self, supervisor, invalid_index):
-        # Searches through Workers under a Supervisor for an opening. invalid_index is the index of the Worker to skip. invalid_index = -1 means no skip.
-        pass
-
-    def _find_opening(self, current_manager, role, current_index):
-        # Finds the closest comparable opening, returns report index and new boss object
-        # If there is another VP position available under President, return that index and President object
-        if role == "Vice President":
-            new_index, new_boss = self._search_vice_presidents(current_manager.boss, current_index)
-        elif role == "Supervisor":
-            new_index, new_boss = self._search_supervisors(current_manager.boss, current_index)
-        elif role == "Worker":
-            new_index, new_boss = self._search_workers(current_manager.boss, current_index)
-
-        # If the found opening does not match the role, return None -------- FIX THIS LATER
-        if role != self._determine_valid_role(new_boss):
-            return None, None
-        return new_index, new_boss
 
     # ----- Main Methods -----
 
@@ -208,7 +236,7 @@ class OrganizationManager:
         target_employee = self._find_employee(target_employee_name)
 
         # Checks if firing manager is in target employee's hierarchy
-        if not self._is_manager_of(firing_manager, target_employee):
+        if not self._is_superior_to(firing_manager, target_employee):
             print(f"Error: {firing_manager_name} is not in the hierarchy of {target_employee_name}.")
             return
         
@@ -232,7 +260,6 @@ class OrganizationManager:
         return
 
 
-    # Temporary layoff implementation ----- Feel free to restart or modify this
     def layoff_employee(self, manager_name: str, target_employee_name: str):
         # Lays off an employee. Attempts to transfer them to the closest comparable opening (Requirement 6).
         # Cannot lay off President
@@ -252,21 +279,20 @@ class OrganizationManager:
         target_employee = self._find_employee(target_employee_name)
 
         # Checks if manager is in target employee's hierarchy
-        if not self._is_manager_of(manager, target_employee):
+        if not self._is_superior_to(manager, target_employee):
             print(f"Error: {manager_name} is not in the hierarchy of {target_employee_name}.")
             return
 
-        index, new_boss = self._find_opening(target_employee.boss, target_employee.role, target_employee.boss.reports.index(target_employee))
+        index, new_boss = self._find_opening(target_employee.boss, target_employee.role)
 
-        # No opening found, remove employee
-        if index == None:
+        # If no opening found, remove employee
+        if index is None:
+            print(f"No comparable openings found")
             self._remove_employee(target_employee)
             return
 
-        # Empty spot or Vacancy found, move employee to new location
-        else:
-            self._move_employee(target_employee, new_boss, index)
-
+        # If opening found, transfer employee
+        self._move_employee(target_employee, new_boss, index)
 
         return
 
@@ -293,13 +319,13 @@ class OrganizationManager:
 
         # Checks if initiator manages employee getting transferred
         employee = self._find_employee(employee_name)
-        if not self._is_manager_of(initiator, employee):
+        if not self._is_superior_to(initiator, employee):
             print(f"Error: {initiator_name} does not manage {employee_name}.")
             return
 
         # Checks if initiator manages destination manager
         destination_manager = self._find_employee(destination_manager_name)
-        if not self._is_manager_of(initiator, destination_manager):
+        if not self._is_superior_to(initiator, destination_manager):
             print(f"Error: {initiator_name} does not manage {destination_manager_name}.")
             return
 
