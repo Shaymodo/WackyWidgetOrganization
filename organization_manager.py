@@ -5,8 +5,9 @@ from employee import Employee, Vacancy
 # Check if a Vacancy object has no reports, delete Vacancy object if so. Should be done after every operation that moves or removes employees
 # Layoff not properly creating Vacancy and leaving reports behind? Unsure if they should leave their reports behind or not
 # Add checks for inputting president name at start of program
+# Add initial question to load from file or create new organization
 # Should we allow transferring an employee to a Vacancy?
-
+# Could make large adjustment, changing empty spots to always be Vacancy objects instead of None. Could simplify some logic and improve consistency.
 
 class OrganizationManager:
     def __init__(self):
@@ -78,6 +79,7 @@ class OrganizationManager:
 
     def _remove_employee(self, employee):
         # Removes an employee from the organization.
+        # Remove employee name from tracking structures
         self.all_names.remove(employee.name)
         del self.employee_lookup[employee.name]
 
