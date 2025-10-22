@@ -449,6 +449,7 @@ class OrganizationManager:
         # Displays the current organization hierarchy (Requirement 11).
         if self.president is None:
             print("Organization is empty.")
+            return
 
         print(f"President: {self.president.name}")
         self._display_loop(self.president, 1)
