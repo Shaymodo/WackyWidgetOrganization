@@ -1,7 +1,6 @@
 from employee import Employee, Vacancy
 
 # TODO:
-# Implement file reading method
 # Check if a Vacancy object has no reports, delete Vacancy object if so. Should be done after every operation that moves or removes employees
 # Layoff not properly creating Vacancy and leaving reports behind? Unsure if they should leave their reports behind or not
 # Add checks for inputting president name at start of program
