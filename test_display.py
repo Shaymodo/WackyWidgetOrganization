@@ -34,3 +34,4 @@ def test_display_with_multiple_levels(org, capsys):
     org.display_organization()
     out = capsys.readouterr().out
     assert out.splitlines() == expected_lines
+    
