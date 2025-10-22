@@ -12,9 +12,10 @@ def main():
     org_manager.initialize_president(starting_name)
 
     print("\nWelcome to the Wacky Widget Company System.")
-    print("Available commands: HIRE, FIRE, QUIT, LAYOFF, TRANSFER, PROMOTE, LOAD, DISPLAY, EXIT.")
+    
 
     while True:
+        print("Available commands: HIRE, FIRE, QUIT, LAYOFF, TRANSFER, PROMOTE, LOAD, DISPLAY, EXIT.")
         try:
             user_input = input("\nEnter command: ").strip()
             if not user_input:
