@@ -11,10 +11,15 @@ def test_promote_valid_one_level(capsys):
     org.hire_employee("VP1", "Supervisor1")
     org.hire_employee("Supervisor1", "Worker1")
 
+    assert org.employee_lookup["Worker1"].boss.name == "Supervisor1"
+
     # Promote Worker1 into the Supervisor vacancy
     org.promote_employee("VP1", "Worker1")
     captured = capsys.readouterr()
     assert "Successfully promoted" in captured.out
+
+    newSuper = org.employee_lookup["Worker1"]
+    assert newSuper.boss.name == "VP1"
 
 
 def test_promote_too_many_levels_fails(capsys):
