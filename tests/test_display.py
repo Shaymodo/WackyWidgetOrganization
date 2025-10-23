@@ -1,12 +1,16 @@
 import pytest
+from organization_manager import OrganizationManager
 
-def test_display_with_president_prints_header(with_president, capsys):
-    with_president.display_organization()
+def test_display_with_president_prints_header(capsys):
+    org = OrganizationManager()
+    org.initialize_president("Nelson")
+    org.display_organization()
     out = capsys.readouterr().out
     assert "President: Nelson" in out
 
-def test_display_without_president_prints_empty_and_does_not_crash(org, capsys):
+def test_display_without_president_prints_empty_and_does_not_crash(capsys):
     # No president initialized
+    org = OrganizationManager()
 
     # Run display (should not raise)
     org.display_organization()
@@ -15,7 +19,8 @@ def test_display_without_president_prints_empty_and_does_not_crash(org, capsys):
     # Must NOT contain "President:" line because there's no president
     assert "President:" not in out
 
-def test_display_with_multiple_levels(org, capsys):
+def test_display_with_multiple_levels(capsys):
+    org = OrganizationManager()
     org.initialize_president("Nelson")
     org.hire_employee("Nelson", "VP1")
     org.hire_employee("Nelson", "VP2")
