@@ -53,3 +53,5 @@ def test_fire_president_not_allowed(capsys):
     org.fire_employee("President1", "President1")
     captured = capsys.readouterr()
     assert "Cannot fire the President" in captured.out
+
+

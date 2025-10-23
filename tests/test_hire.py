@@ -55,7 +55,7 @@ def test_hire_worker_cannot_hire(capsys):
     assert "cannot hire" in captured.out
 
 
-def test_hire_max_capacity(capsys):
+def test_hire_above_max_capacity_president(capsys):
     """Test that a manager cannot hire if at max capacity."""
     org = OrganizationManager()
     org.initialize_president("President1")
@@ -67,6 +67,67 @@ def test_hire_max_capacity(capsys):
     assert "has reached maximum direct reports" in captured.out
 
 
+def test_hire_within_capacity_president(with_president, capsys):
+    with_president.hire_employee("Nelson", "VP1")
+    out = capsys.readouterr().out
+    assert "Successfully hired VP1 under Nelson." in out
+    assert "has reached maximum direct reports" not in out
+
+
+def test_hire_above_max_capacity_vice_president(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    # Vice President can oversee up to 3 Supervisors
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("VP1", "S1")
+    org.hire_employee("VP1", "S2")
+    org.hire_employee("VP1", "S3")
+    org.hire_employee("VP1", "S4") # should fail
+    captured = capsys.readouterr()
+    assert "has reached maximum direct reports" in captured.out
+
+
+def test_hire_within_capacity_vice_president(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    # Vice President can oversee up to 5 Supervisors
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("VP1", "S1")
+    org.hire_employee("VP1", "S2")
+    captured = capsys.readouterr()
+    assert "Successfully hired S2" in captured.out
+    assert "has reached maximum direct reports" not in captured.out
+
+
+def test_hire_above_max_capacity_supervisor(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    # Supervisor can oversee up to 5 Workers
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("VP1", "S1")
+    org.hire_employee("S1", "W1")
+    org.hire_employee("S1", "W2")
+    org.hire_employee("S1", "W3")
+    org.hire_employee("S1", "W4")
+    org.hire_employee("S1", "W5")
+    org.hire_employee("S1", "W6")  # should fail
+    captured = capsys.readouterr()
+    assert "has reached maximum direct reports" in captured.out
+
+
+def test_hire_within_capacity_supervisor(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    # Supervisor can oversee up to 5 Workers
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("VP1", "S1")
+    org.hire_employee("S1", "W1")
+    org.hire_employee("S1", "W2")
+    captured = capsys.readouterr()
+    assert "Successfully hired W2" in captured.out
+    assert "has reached maximum direct reports" not in captured.out
+
+
 def test_hire_fills_vacancy_after_fire(capsys):
     """Test that a manager can fill a vacancy left by a fired employee."""
     org = OrganizationManager()
@@ -76,3 +137,15 @@ def test_hire_fills_vacancy_after_fire(capsys):
     org.hire_employee("President1", "VP2")  # fills vacancy
     captured = capsys.readouterr()
     assert "Successfully placed" in captured.out or "Successfully hired" in captured.out
+
+
+def test_hire_cannot_fill_with_no_vacancy(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("President1", "VP2")
+    org.fire_employee("President1", "VP2")
+    org.hire_employee("President1", "VP3")
+    org.hire_employee("President1", "VP4") # tries to fill an already filled position
+    out = capsys.readouterr().out
+    assert "has reached maximum direct reports" in out

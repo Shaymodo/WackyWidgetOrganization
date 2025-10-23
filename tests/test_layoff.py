@@ -64,3 +64,67 @@ def test_layoff_president_not_allowed(capsys):
     org.layoff_employee("President1", "President1")
     captured = capsys.readouterr()
     assert "Cannot lay off the President" in captured.out
+
+def test_layoff__with_opening_succeed_first_same_hierarchy(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("President1", "VP2")
+
+    org.hire_employee("VP1", "Supervisor1")
+    org.hire_employee("Supervisor1", "Worker1")
+    org.hire_employee("Supervisor1", "Worker2")
+    org.hire_employee("Supervisor1", "Worker3")
+    org.hire_employee("Supervisor1", "Worker4")
+    org.hire_employee("Supervisor1", "Worker5")
+
+    org.hire_employee("VP1", "Supervisor2")
+    org.hire_employee("Supervisor2", "Worker6") # Supervisor2 has vacancy
+
+    org.hire_employee("VP2", "Supervisor3")
+    org.hire_employee("Supervisor3", "Worker7") # different VP branch; also has vacancy
+
+    org.layoff_employee("Supervisor1", "Worker5") # should check first within same hierarchy
+
+    assert "Worker5" in org.employee_lookup
+    worker5 = org.employee_lookup["Worker5"]
+
+    assert worker5.boss is not None
+    assert worker5.boss.name == "Supervisor2"
+
+    super1 = org.employee_lookup["Supervisor1"]
+    super2 = org.employee_lookup["Supervisor2"]
+    assert worker5 in super2.reports
+    assert worker5 not in super1.reports
+
+
+def test_layoff__with_opening_succeed_diff_hierarchy(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("President1", "VP2")
+
+    org.hire_employee("VP1", "Supervisor1")
+    org.hire_employee("Supervisor1", "Worker1")
+    org.hire_employee("Supervisor1", "Worker2")
+    org.hire_employee("Supervisor1", "Worker3")
+    org.hire_employee("Supervisor1", "Worker4")
+    org.hire_employee("Supervisor1", "Worker5")
+
+    org.hire_employee("VP2", "Supervisor2")
+    org.hire_employee("Supervisor2", "Worker7") # different VP branch; has vacancy
+
+    org.layoff_employee("Supervisor1", "Worker5")
+
+    assert "Worker5" in org.employee_lookup
+    worker5 = org.employee_lookup["Worker5"]
+
+    assert worker5.boss is not None
+    assert worker5.boss.name == "Supervisor2"
+
+    super1 = org.employee_lookup["Supervisor1"]
+    super2 = org.employee_lookup["Supervisor2"]
+    assert worker5 in super2.reports
+    assert worker5 not in super1.reports
+
+

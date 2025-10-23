@@ -63,3 +63,27 @@ def test_transfer_nonexistent_names(capsys):
     org.transfer_employee("President1", "GhostEmployee", "GhostManager")
     captured = capsys.readouterr()
     assert "does not exist" in captured.out
+
+
+def test_transfer_allowed_by_vice_president(capsys):
+    org = OrganizationManager()
+    org.initialize_president("President1")
+
+    # President oversees 2 VPs max
+    org.hire_employee("President1", "VP1")
+    org.hire_employee("President1", "VP2")
+
+    # VP1 hires a Supervisor
+    org.hire_employee("VP1", "Supervisor1")
+    org.hire_employee("VP1", "Supervisor2")
+
+    # VP2 fills all 3 Supervisor spots
+    org.hire_employee("Supervisor1", "Worker1")
+    org.hire_employee("Supervisor1", "Worker2")
+
+    capsys.readouterr()
+
+    org.transfer_employee("VP1", "Worker1", "Supervisor2")
+    captured = capsys.readouterr()
+    assert "Successfully" in captured.out
+    
