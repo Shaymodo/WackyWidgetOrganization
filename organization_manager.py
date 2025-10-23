@@ -422,7 +422,7 @@ class OrganizationManager:
         receiving_manager.reports.append(target_employee)
         target_employee.promote()
 
-        print(f"bbbSuccessfully promoted {target_employee_name} under {receiving_manager_name}.")
+        print(f"Successfully promoted {target_employee_name} under {receiving_manager_name}.")
         return
 
 
