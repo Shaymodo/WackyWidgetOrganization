@@ -15,7 +15,7 @@ def main():
     
 
     while True:
-        print("Available commands: HIRE, FIRE, QUIT, LAYOFF, TRANSFER, PROMOTE, LOAD, DISPLAY, EXIT.")
+        print("Available commands: HIRE, FIRE, QUIT, LAYOFF, TRANSFER, PROMOTE, DISPLAY, EXIT.")
         try:
             user_input = input("\nEnter command: ").strip()
             if not user_input:
@@ -71,12 +71,6 @@ def main():
                     continue
                 org_manager.promote_employee(parts[1], parts[2])
 
-            elif command == "LOAD":
-                if len(parts) != 2:
-                    incorrect_argument_count(command)
-                    print(f"Syntax should be: LOAD <filepath>")
-                    continue
-                org_manager.promote_employee(parts[1])
 
             elif command == "DISPLAY":
                 if len(parts) != 1:

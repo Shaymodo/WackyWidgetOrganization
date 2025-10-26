@@ -413,7 +413,7 @@ class OrganizationManager:
                 target_employee.reports = receiving_manager.reports[index].reports
                 receiving_manager.reports[index] = target_employee
                 target_employee.promote()
-                print(f"aaaSuccessfully promoted {target_employee_name} under {receiving_manager_name}.")
+                print(f"Successfully promoted {target_employee_name} under {receiving_manager_name}.")
                 return
 
         # No Vacancy object found, normal addition
@@ -427,24 +427,6 @@ class OrganizationManager:
 
 
     # Finish this ----------------------------------------------------------------------
-    def load_organization_from_file(self, filepath: str):
-        # Reads in the initial organization structure from a file (Requirement 9).
-        # Checks if file exists
-        try:
-            with open(filepath, 'r') as file:
-                lines = file.readlines()
-        except FileNotFoundError:
-            print(f"Error: File {filepath} not found.")
-            return
-        # Process each line
-        for line in lines:
-            # Need to decide on file structure first
-            pass
-
-        print(f"Successfully loaded organization from {filepath}.")
-        return
-
-
     def display_organization(self):
         # Displays the current organization hierarchy (Requirement 11).
         if self.president is None:
